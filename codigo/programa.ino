@@ -12,13 +12,61 @@
 DHT dht(dhtPin, DHT11);
 
 //Entrada
-#define botao1Pin 1
-#define botao2Pin 2
-#define botao3Pin 3
+#define b1Pin 1
+#define b2Pin 2
+#define b3Pin 3
 
 //Saida
 #define ledPin 4
 LiquidCrystal lcd(10, 9, 8, 7, 6, 5);
+
+//Variáveis globais
+#define nEspecies 2
+//Para as partes do programa que dependem da especie escolhida
+int especie = 0;
+//Podemos adicionar mais se quisermos, dependndo da memoria
+const char[nEspecies][16] especies = {{"Cebolinha"}, {"Manjericao"}};
+
+//Le as informacoes dos sensores
+void leSensores(int* b_especie, int* b_irrigacao, int* b_scroll, int* lum, int* hsolo1, int* hsolo2, int* nagua, float h_ar, float temp){
+  //Definicao das entradas dos botoes**************************************
+  *b_especie = digitalRead(botao1Pin);
+  *b_irrigacao = digitalRead(botao2Pin);
+  *b_scroll = digitalRead(botao3Pin);
+
+  //Armazenamento das entradas dos sensores********************************
+  *lum = analogRead(ldrPin);
+  *hsolo1 = analogRead(higrometro1Pin);
+  *hsolo2 = analogRead(higrometro2Pin);
+  *nagua = analogRead(sensorAguaPin); //Precisa ser calibrado
+
+  *h_ar = dht.readHumidity();
+  *temp = dht.readTemperature();
+}
+
+//Mostra as informacoes dos sensores no display
+void imprimeSensores(int lum, int hsolo1, int hsolo2, int nagua, float h_ar, float temp){
+  
+  //DHT11 - Temperatura e Humidade do Ar
+    /*
+    * Talvez possamos usar lcd.autoscroll() para mostrar
+    * todas as informacoes?
+    */
+    lcd.setCursor(0,0);
+    lcd.print("Temperatura: ");
+    lcd.print(temp);
+    lcd.print( (char) 223);
+    lcd.print("C  ");
+    lcd.print("Hum. Rel. do Ar: ");
+    lcd.print(h_ar);
+    lcd.print("%");
+
+    //Higrometro - Humidade do solo****************************************
+}
+
+void trocaDeEspecie(){
+
+}
 
 void setup() {
   
@@ -44,36 +92,27 @@ void setup() {
 
 void loop() {
 
-  //Definicao das entradas dos botoes
-  int b1 = digitalRead(botao1Pin);
-  int b2 = digitalRead(botao2Pin);
-  int b3 = digitalRead(botao3Pin);
+  int b1, b2, b3, lum, hsolo1, hsolo2, nagua;
+  float h_ar, temp;
 
-  //Armazenamento das entradas dos sensores
-  int lum = analogRead(ldrPin);
-  int hsolo1 = analogRead(higrometro1Pin);
-  int hsolo2 = analogRead(higrometro2Pin);
-  int nagua = analogRead(sensorAguaPin); //Precisa ser calibrado
+  /* Nesta funcao, dos botoes:
+  b1 e para mudar de especie
+  b2 e para irrigar
+  b3 e para rodar texto no LCD
+  */
+  leSensores(&b1, &b2, &b3, &lum, &hsolo1, &hsolo2, &nagua, &h_ar, &temp);
 
-  float h_ar = dht.readHumidity();
-  float temp = dht.readTemperature();
-
-  //Mostra as informacoes dos sensores no display
-  
-  //DHT11 - Temperatura e Humidade do Ar
-  /*
-   * Podemos usar lcd.autoscroll() para mostrar
-   * todas as informacoes
-   */
-  lcd.setCursor(0,0);
-  lcd.print("Temperatura: ");
-  lcd.print(temp);
-  lcd.print( (char) 223);
-  lcd.print("C  ");
-  lcd.print("Hum. Rel. do Ar: ");
-  lcd.print(h_ar);
-  lcd.print("%");
-  
-  
+  if(b_especie == "LOW"){
+    
+    /* Nesta funcao, dos botoes:
+    b1 e para rodar a especie
+    b3 e para confirmar selecao
+    */
+    imprimeSensores(lum, hsolo1, hsolo2, nagua, lum, hsolo1, hsolo2, nagua);
+    
+   }else if(b_especie == "HIGH"){
+    trocaDeEspecie();
+   }
+   
   delay(1000);
 }
