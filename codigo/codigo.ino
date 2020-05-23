@@ -23,9 +23,10 @@ LiquidCrystal lcd(10, 9, 8, 7, 6, 5);
 //Variáveis globais
 #define nEspecies 2
 //Para as partes do programa que dependem da especie escolhida
-int especie = 0;
+volatile int especie = 0;
 //Podemos adicionar mais se quisermos, dependndo da memoria
 const char[nEspecies][16] especies = {{"Cebolinha"}, {"Manjericao"}};
+
 
 //Le as informacoes dos sensores
 void leSensores(int* b_especie, int* b_irrigacao, int* b_scroll, int* lum, int* hsolo1, int* hsolo2, int* nagua, float h_ar, float temp){
@@ -64,8 +65,12 @@ void imprimeSensores(int lum, int hsolo1, int hsolo2, int nagua, float h_ar, flo
     //Higrometro - Humidade do solo****************************************
 }
 
+//Interrupcao que troca as especificacoes da especie
 void trocaDeEspecie(){
-
+  especie++;
+  if(especie>=nEspecies){
+    especie=0;  
+  }  
 }
 
 void setup() {
@@ -86,8 +91,11 @@ void setup() {
   pinMode(botao2Pin, INPUT);
   pinMode(botao3Pin, INPUT);
 
-  //
+  //Saida
   pinMode(ledPin, OUTPUT);
+
+  //Interrupcoes
+  attachInterrupt(0, trocaDeEspecie, FALLING);
 }
 
 void loop() {
@@ -102,6 +110,7 @@ void loop() {
   */
   leSensores(&b1, &b2, &b3, &lum, &hsolo1, &hsolo2, &nagua, &h_ar, &temp);
 
+  imprimeSensores(lum, hsolo1, hsolo2, nagua, lum, hsolo1, hsolo2, nagua);
   if(b_especie == "LOW"){
     
     /* Nesta funcao, dos botoes:
