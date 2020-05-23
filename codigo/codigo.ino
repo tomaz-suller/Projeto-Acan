@@ -133,10 +133,10 @@ void loop() {
 
   //Condicionais de irrigacao
   if(higrometro1Pin >= especies[especie].limIrrig){
-    //Ativa o mecanismo de irrigacao
+    irriga();
   }
   else if(higrometro2Pin >= especies[especie].limIrrig){
-    //Ativa o mecanismo de irrigacao
+    irriga();
   }
    
   delay(1000);
