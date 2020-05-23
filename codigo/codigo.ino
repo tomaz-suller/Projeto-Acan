@@ -73,6 +73,10 @@ void imprimeSensores(int lum, int hsolo1, int hsolo2, int nagua, float h_ar, flo
     //Higrometro - Humidade do solo****************************************
 }
 
+void irriga(){
+  //Implementar mecanismo de irrigacao  
+}
+
 //Interrupcao que troca o indice da especie
 void trocaDeEspecie(){
   especie++;
@@ -112,7 +116,6 @@ void loop() {
   int b1, b2, b3, lum, hsolo1, hsolo2, nagua;
   float h_ar, temp;
 
-
   /* Nesta funcao, dos botoes:
   b2 e para mudar de especie
   b3 e para irrigar
@@ -121,6 +124,14 @@ void loop() {
   leSensores(&b1, &b2, &b3, &lum, &hsolo1, &hsolo2, &nagua, &h_ar, &temp);
 
   imprimeSensores(lum, hsolo1, hsolo2, nagua, h_ar, temp);
+
+  //Loop de irrigacao
+  if(higrometro1Pin >= especies[especie].limIrrig){
+    //Ativa o mecanismo de irrigacao
+  }
+  else if(higrometro2Pin >= especies[especie].limIrrig){
+    //Ativa o mecanismo de irrigacao
+  }
    
   delay(1000);
 }
