@@ -71,6 +71,7 @@ void imprimeSensores(int lum, int hsolo1, int hsolo2, int nagua, float h_ar, flo
     lcd.print("%");
 
     //Higrometro - Humidade do solo****************************************
+    //E possivel mostrar a especie selecionada (variavel -> especies[especie].nome)
 }
 
 void irriga(){
@@ -101,7 +102,7 @@ void setup() {
   //Entrada
   pinMode(b1Pin, INPUT);
   pinMode(b2Pin, INPUT);
-  pinMode(b2Pin, INPUT);
+  pinMode(b3Pin, INPUT);
 
   //Saida
   pinMode(ledPin, OUTPUT);
@@ -117,15 +118,20 @@ void loop() {
   float h_ar, temp;
 
   /* Nesta funcao, dos botoes:
+  b1 e para irrigar manualmente
   b2 e para mudar de especie
-  b3 e para irrigar
-  LCD provavelmente deve rodar em auto-scroll devido a limitacoes de hardware
+  LCD provavelmente deve rodar no auto-scroll, ou por interrupcoes no b3;
   */
   leSensores(&b1, &b2, &b3, &lum, &hsolo1, &hsolo2, &nagua, &h_ar, &temp);
 
   imprimeSensores(lum, hsolo1, hsolo2, nagua, h_ar, temp);
 
-  //Loop de irrigacao
+  //Bypass do b1 (Irrigacao manual) funciona melhor se usar um switch inves de um botao
+  while(b1 == HIGH){
+    irriga();  
+  }
+
+  //Condicionais de irrigacao
   if(higrometro1Pin >= especies[especie].limIrrig){
     //Ativa o mecanismo de irrigacao
   }
