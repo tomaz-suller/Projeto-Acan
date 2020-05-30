@@ -28,12 +28,16 @@ LiquidCrystal lcd(10, 9, 8, 7, 6, 5);
 
 //Variáveis globais
 #define nEspecies 2
+
+volatile int scrollstate = -1;
+String texto = "Temperatura: °C Hum Rel do Ar: % Hum do Solo: ";
+#define tamanho_texto 46
+
 //Para as partes do programa que dependem da especie escolhida
 volatile int especie = 0;
 
 //Lista de especies:
 ESPECIE_TIPO especies[nEspecies] = {{"Cebolinha", 100}, {"Manjericao", 200}}; //{Nome, Limite de irrigacao}
-
 
 
 //Le as informacoes dos sensores
@@ -56,22 +60,32 @@ void leSensores(int* b_especie, int* b_irrigacao, int* b_scroll, int* lum, int* 
 //Mostra as informacoes dos sensores no display
 void imprimeSensores(int lum, int hsolo1, int hsolo2, int nagua, float h_ar, float temp){
   
-  //DHT11 - Temperatura e Humidade do Ar
-    /*
-    * Talvez possamos usar lcd.autoscroll() para mostrar
-    * todas as informacoes?
-    */
-    lcd.setCursor(0,0);
-    lcd.print("Temperatura: ");
-    lcd.print(temp);
-    lcd.print( (char) 223);
-    lcd.print("C  ");
-    lcd.print("Hum. Rel. do Ar: ");
-    lcd.print(h_ar);
-    lcd.print("%");
+  /*
+  * Talvez possamos usar lcd.autoscroll() para mostrar
+  * todas as informacoes?
+  */
+  lcd.setCursor(1,0);
+  lcd.print(especies[especie].nome);
 
-    //Higrometro - Humidade do solo****************************************
-    //E possivel mostrar a especie selecionada (variavel -> especies[especie].nome)
+  lcd.setCursor(0,0);
+  lcd.print("Temp.: ");
+  lcd.print(temp);
+  lcd.print(" °C ");
+  //Imprime exatamente 16 caracteres
+  if(scrollstate == 1){
+    texto = texto.substring(0,12) + String(temp) + texto.substring(13,30) + String(h_ar) + texto.substring(31,46) + String(hsolo1);
+
+    int ini = 0, fim = 16;
+
+    for(int i = 0; i < tamanho_texto; i++, ini++, fim++){
+      lcd.setCursor(0, 0);
+      if(fim > tamanho_texto) break;
+      lcd.print( message.substring(ini, fim) );
+      delay(300);
+    }
+    
+  }
+
 }
 
 void irriga(){
@@ -84,6 +98,10 @@ void trocaDeEspecie(){
   if(especie>=nEspecies){
     especie=0;  
   }  
+}
+
+void scroll(){
+  scrollstate *= -1;
 }
 
 void setup() {
@@ -110,6 +128,7 @@ void setup() {
   //Interrupcoes
   //Troca de especie ligada ao botao 2
   attachInterrupt(0, trocaDeEspecie, FALLING);
+  attachInterrupt(1, scroll, RISING);
 }
 
 void loop() {
