@@ -2,6 +2,12 @@
 #include "DHT.h"
 #include <LiquidCrystal.h>
 
+//Variavel personalizada para especies
+typedef struct{
+  char nome[16]; //Nome e uma string para ser mostrada no display
+  int limIrrig; //Limite de umidade do solo para o qual a planta deve ser irrigada
+} ESPECIE_TIPO;
+
 //Sensores
 #define ldrPin A0
 #define higrometro1Pin A4
@@ -23,16 +29,19 @@ LiquidCrystal lcd(10, 9, 8, 7, 6, 5);
 //Variáveis globais
 #define nEspecies 2
 //Para as partes do programa que dependem da especie escolhida
-int especie = 0;
-//Podemos adicionar mais se quisermos, dependndo da memoria
-const char[nEspecies][16] especies = {{"Cebolinha"}, {"Manjericao"}};
+volatile int especie = 0;
+
+//Lista de especies:
+ESPECIE_TIPO especies[nEspecies] = {{"Cebolinha", 100}, {"Manjericao", 200}}; //{Nome, Limite de irrigacao}
+
+
 
 //Le as informacoes dos sensores
-void leSensores(int* b_especie, int* b_irrigacao, int* b_scroll, int* lum, int* hsolo1, int* hsolo2, int* nagua, float h_ar, float temp){
+void leSensores(int* b_especie, int* b_irrigacao, int* b_scroll, int* lum, int* hsolo1, int* hsolo2, int* nagua, float* h_ar, float* temp){
   //Definicao das entradas dos botoes**************************************
-  *b_especie = digitalRead(botao1Pin);
-  *b_irrigacao = digitalRead(botao2Pin);
-  *b_scroll = digitalRead(botao3Pin);
+  *b_especie = digitalRead(b1Pin);
+  *b_irrigacao = digitalRead(b2Pin);
+  *b_scroll = digitalRead(b3Pin);
 
   //Armazenamento das entradas dos sensores********************************
   *lum = analogRead(ldrPin);
@@ -62,10 +71,19 @@ void imprimeSensores(int lum, int hsolo1, int hsolo2, int nagua, float h_ar, flo
     lcd.print("%");
 
     //Higrometro - Humidade do solo****************************************
+    //E possivel mostrar a especie selecionada (variavel -> especies[especie].nome)
 }
 
-void trocaDeEspecie(){
+void irriga(){
+  //Implementar mecanismo de irrigacao  
+}
 
+//Interrupcao que troca o indice da especie
+void trocaDeEspecie(){
+  especie++;
+  if(especie>=nEspecies){
+    especie=0;  
+  }  
 }
 
 void setup() {
@@ -82,12 +100,16 @@ void setup() {
   pinMode(sensorAguaPin, INPUT);
 
   //Entrada
-  pinMode(botao1Pin, INPUT);
-  pinMode(botao2Pin, INPUT);
-  pinMode(botao3Pin, INPUT);
+  pinMode(b1Pin, INPUT);
+  pinMode(b2Pin, INPUT);
+  pinMode(b3Pin, INPUT);
 
-  //
+  //Saida
   pinMode(ledPin, OUTPUT);
+
+  //Interrupcoes
+  //Troca de especie ligada ao botao 2
+  attachInterrupt(0, trocaDeEspecie, FALLING);
 }
 
 void loop() {
@@ -96,23 +118,26 @@ void loop() {
   float h_ar, temp;
 
   /* Nesta funcao, dos botoes:
-  b1 e para mudar de especie
-  b2 e para irrigar
-  b3 e para rodar texto no LCD
+  b1 e para irrigar manualmente
+  b2 e para mudar de especie
+  LCD provavelmente deve rodar no auto-scroll, ou por interrupcoes no b3;
   */
   leSensores(&b1, &b2, &b3, &lum, &hsolo1, &hsolo2, &nagua, &h_ar, &temp);
 
-  if(b_especie == "LOW"){
-    
-    /* Nesta funcao, dos botoes:
-    b1 e para rodar a especie
-    b3 e para confirmar selecao
-    */
-    imprimeSensores(lum, hsolo1, hsolo2, nagua, lum, hsolo1, hsolo2, nagua);
-    
-   }else if(b_especie == "HIGH"){
-    trocaDeEspecie();
-   }
+  imprimeSensores(lum, hsolo1, hsolo2, nagua, h_ar, temp);
+
+  //Bypass do b1 (Irrigacao manual) funciona melhor se usar um switch inves de um botao
+  while(b1 == HIGH){
+    irriga();  
+  }
+
+  //Condicionais de irrigacao
+  if(hsolo1 >= especies[especie].limIrrig){
+    irriga();
+  }
+  else if(hsolo2 >= especies[especie].limIrrig){
+    irriga();
+  }
    
   delay(1000);
 }
