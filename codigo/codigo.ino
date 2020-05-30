@@ -31,7 +31,7 @@ LiquidCrystal lcd(10, 9, 8, 7, 6, 5);
 
 volatile int scrollstate = -1;
 String texto = "Temperatura: °C Hum Rel do Ar: % Hum do Solo: ";
-#define tamanho_texto 46
+#define tamanho_texto 56 //Ainda precisa contar o numero de caracteres da umidade do solo
 
 //Para as partes do programa que dependem da especie escolhida
 volatile int especie = 0;
@@ -60,10 +60,6 @@ void leSensores(int* b_especie, int* b_irrigacao, int* b_scroll, int* lum, int* 
 //Mostra as informacoes dos sensores no display
 void imprimeSensores(int lum, int hsolo1, int hsolo2, int nagua, float h_ar, float temp){
   
-  /*
-  * Talvez possamos usar lcd.autoscroll() para mostrar
-  * todas as informacoes?
-  */
   lcd.setCursor(1,0);
   lcd.print(especies[especie].nome);
 
@@ -77,13 +73,12 @@ void imprimeSensores(int lum, int hsolo1, int hsolo2, int nagua, float h_ar, flo
 
     int ini = 0, fim = 16;
 
-    for(int i = 0; i < tamanho_texto; i++, ini++, fim++){
+    for(; fim <= tamanho_texto; ini++, fim++){
       lcd.setCursor(0, 0);
-      if(fim > tamanho_texto) break;
-      lcd.print( message.substring(ini, fim) );
+      lcd.print( message.substring(ini, fim) ); 
       delay(300);
     }
-    
+
   }
 
 }
