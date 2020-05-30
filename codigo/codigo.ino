@@ -151,10 +151,10 @@ void loop() {
   }
 
   //Condicionais de irrigacao
-  if(higrometro1Pin >= especies[especie].limIrrig){
+  if(hsolo1 >= especies[especie].limIrrig){
     irriga();
   }
-  else if(higrometro2Pin >= especies[especie].limIrrig){
+  else if(hsolo2 >= especies[especie].limIrrig){
     irriga();
   }
    
