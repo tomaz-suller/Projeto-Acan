@@ -75,7 +75,7 @@ void imprimeSensores(int lum, int hsolo1, int hsolo2, int nagua, float h_ar, flo
 
     for(; fim <= tamanho_texto; ini++, fim++){
       lcd.setCursor(0, 0);
-      lcd.print( message.substring(ini, fim) ); 
+      lcd.print( texto.substring(ini, fim) ); 
       delay(300);
     }
 
