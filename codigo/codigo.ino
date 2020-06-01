@@ -12,7 +12,7 @@ typedef struct{
 #define ldrPin A0
 #define higrometroPin A4
 #define dhtPin 13
-#define sensorAguaPin A3
+#define solenoidePin 12
 
 DHT dht(dhtPin, DHT11);
 
@@ -42,6 +42,7 @@ volatile int especie = 0;
 //Lista de especies:
 ESPECIE_TIPO especies[nEspecies] = {{"Cebolinha", 100}, {"Manjericao", 200}}; //{Nome, Limite de irrigacao}
 
+/**********************************************************************/
 
 //Le as informacoes dos sensores
 void leSensores(int* b_especie, int* b_irrigacao, int* b_scroll, int* lum, int* hsolo, float* h_ar, float* temp){
@@ -128,6 +129,7 @@ void setup() {
 
   //Saida
   pinMode(ledPin, OUTPUT);
+  pinMode(solenoidePin, OUTPUT);
 
   //Interrupcoes
   attachInterrupt(0, trocaDeEspecie, FALLING);
@@ -151,11 +153,12 @@ void loop() {
   }
 
   //Condicionais de irrigacao
-  if(hsolo1 >= especies[especie].limIrrig){
-    irriga();
+  if(hsolo[0] >= especies[especie].limIrrig && hsolo[1] >= especies[especie].limIrrig){
+    digitalWrite(solenoidePin, HIGH);
   }
-  else if(hsolo2 >= especies[especie].limIrrig){
-    irriga();
+
+  if(hsolo[0] <= especies[especie].limIrrig && hsolo[1] <= especies[especie].limIrrig){
+    digitalWrite(solenoidePin, LOW);
   }
    
   delay(1000);
