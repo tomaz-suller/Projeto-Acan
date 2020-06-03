@@ -2,6 +2,8 @@
 #include "DHT.h"
 #include <LiquidCrystal.h>
 
+#define DEBUG true
+
 //Variavel personalizada para especies
 typedef struct{
   char nome[16]; //Nome e uma string para ser mostrada no display
@@ -67,23 +69,47 @@ void leSensores(int* b_irrigacao, int* lum, int* hsolo, float* h_ar, float* temp
 //Mostra as informacoes dos sensores no display
 void imprimeSensores(int lum, int hsolo, float h_ar, float temp){
   
-  lcd.setCursor(1,0);
-  lcd.print(especies[especie].nome);
+  if(DEBUG){
 
-  lcd.setCursor(0,0);
-  lcd.print("Temp.: ");
-  lcd.print(temp);
-  lcd.print(" °C ");
-  //Imprime exatamente 16 caracteres
-  if(scrollstate == 1){
-    texto = texto.substring(0,12) + String(temp) + texto.substring(13,30) + String(h_ar) + texto.substring(31,46) + String(hsolo);
+    Serial.println(especies[especie].nome);
 
-    int ini = 0, fim = 16;
+    Serial.print("Temp.: ");
+    Serial.print(temp);
+    Serial.print(" °C ");
+    //Imprime exatamente 16 caracteres
+    if(scrollstate == 1){
+      texto = texto.substring(0,12) + String(temp) + texto.substring(13,30) + String(h_ar) + texto.substring(31,46) + String(hsolo);
 
-    for(; fim <= tamanho_texto; ini++, fim++){
-      lcd.setCursor(0, 0);
-      lcd.print( texto.substring(ini, fim) ); 
-      delay(300);
+      int ini = 0, fim = 16;
+
+      for(; fim <= tamanho_texto; ini++, fim++){
+        Serial.println( texto.substring(ini, fim) ); 
+        delay(300);
+      }
+
+    }
+
+  }else{
+
+    lcd.setCursor(1,0);
+    lcd.print(especies[especie].nome);
+
+    lcd.setCursor(0,0);
+    lcd.print("Temp.: ");
+    lcd.print(temp);
+    lcd.print(" °C ");
+    //Imprime exatamente 16 caracteres
+    if(scrollstate == 1){
+      texto = texto.substring(0,12) + String(temp) + texto.substring(13,30) + String(h_ar) + texto.substring(31,46) + String(hsolo);
+
+      int ini = 0, fim = 16;
+
+      for(; fim <= tamanho_texto; ini++, fim++){
+        lcd.setCursor(0, 0);
+        lcd.print( texto.substring(ini, fim) ); 
+        delay(300);
+      }
+
     }
 
   }
