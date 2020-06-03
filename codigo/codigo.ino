@@ -27,41 +27,34 @@ LiquidCrystal lcd(10, 9, 8, 7, 6, 5);
 
 /* Variaveis globais */
 #define nEspecies 2
+int primeiraLeitura;
 
 //Arrays para armazenar valores dos sensores
-int b1[2], b2[2], b3[2], lum[2], hsolo[2];
+int b1, lum[2], hsolo[2];
 float h_ar[2], temp[2];
 
 volatile int scrollstate = -1;
 String texto = "Temperatura: °C Hum Rel do Ar: % Hum do Solo: ";
-#define tamanho_texto 60 //Ainda precisa contar o numero de caracteres da umidade do solo
+#define tamanho_texto 60
 
 //Para as partes do programa que dependem da especie escolhida
 volatile int especie = 0;
 
 //Lista de especies:
-ESPECIE_TIPO especies[nEspecies] = {{"Cebolinha", 100}, {"Manjericao", 200}}; //{Nome, Limite de irrigacao}
+ESPECIE_TIPO especies[nEspecies] = {{"Cebolinha", 700}, {"Manjericao", 800}}; //{Nome, Limite de irrigacao}
 
 /**********************************************************************/
 
 //Le as informacoes dos sensores
-void leSensores(int* b_especie, int* b_irrigacao, int* b_scroll, int* lum, int* hsolo, float* h_ar, float* temp){
-  
-  //Armazena ultimo valor do sensor
-  b_especie[0] = b_especie[1]
-  b_irrigacao[0] = b_irrigacao[1] 
-  b_scroll[0] = b_scroll[1]
+void leSensores(int* b_irrigacao, int* lum, int* hsolo, float* h_ar, float* temp){
+  lum[0] = lum[1];
+  hsolo[0] = hsolo[1];
 
-  lum[0] = lum[1]
-  hsolo[0] = hsolo[1]
-
-  h_ar[0] = h_ar[1]
-  temp[0] = temp[1]
+  h_ar[0] = h_ar[1];
+  temp[0] = temp[1];
   
   //Definicao das entradas dos botoes**************************************
-  b_especie[1] = digitalRead(b1Pin);
-  b_irrigacao[1] = digitalRead(b2Pin);
-  b_scroll[1] = digitalRead(b3Pin);
+  b_irrigacao = digitalRead(b1Pin);
 
   //Armazenamento das entradas dos sensores********************************
   lum[1] = analogRead(ldrPin);
@@ -110,6 +103,11 @@ void scroll(){
   scrollstate *= -1;
 }
 
+//Irrigacao
+void irriga(){
+  //Implementar controle do solenoide  
+}
+
 void setup() {
   
   Serial.begin(9600);
@@ -120,7 +118,6 @@ void setup() {
   pinMode(ldrPin, INPUT);
   pinMode(higrometroPin, INPUT);
   pinMode(dhtPin, INPUT);
-  pinMode(sensorAguaPin, INPUT);
 
   //Entrada
   pinMode(b1Pin, INPUT);
@@ -134,6 +131,9 @@ void setup() {
   //Interrupcoes
   attachInterrupt(0, trocaDeEspecie, FALLING);
   attachInterrupt(1, scroll, RISING);
+
+  //Define a primeira leitura dos sensores
+  primeiraLeitura = 1;
 }
 
 void loop() {
@@ -143,11 +143,23 @@ void loop() {
   b2 e para mudar de especie por interrupcao
   b3 e para alterar o estado do rolamento por interrupcao;
   */
-  leSensores(b1, b2, b3, lum, hsolo, h_ar, temp);
 
+  //Atualiza os dados dos sensores
+  leSensores(&b1, lum, hsolo, h_ar, temp);
+
+  //Conserta o erro de logica da primeira leitura (um termo [0] do array com valor aleatorio)
+  if(primeiraLeitura){
+    lum[0] = lum[1];
+    hsolo[0] = hsolo[1];
+    h_ar[0] = h_ar[1];
+    temp[0] = temp[1];
+    primeiraLeitura = 0;
+  }
+
+  //Imprime os dados dos sensores
   imprimeSensores(lum[1], hsolo[1], h_ar[1], temp[1]);
 
-  //Bypass do b1 (Irrigacao manual) funciona melhor se usar um switch inves de um botao
+  //Bypass do b1 (irrigacao manual)
   while(b1 == HIGH){
     irriga();  
   }
@@ -155,9 +167,7 @@ void loop() {
   //Condicionais de irrigacao
   if(hsolo[0] >= especies[especie].limIrrig && hsolo[1] >= especies[especie].limIrrig){
     digitalWrite(solenoidePin, HIGH);
-  }
-
-  if(hsolo[0] <= especies[especie].limIrrig && hsolo[1] <= especies[especie].limIrrig){
+  }else if(hsolo[0] < especies[especie].limIrrig && hsolo[1] < especies[especie].limIrrig){
     digitalWrite(solenoidePin, LOW);
   }
    
