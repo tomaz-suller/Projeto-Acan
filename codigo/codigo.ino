@@ -145,7 +145,7 @@ void loop() {
   */
 
   //Atualiza os dados dos sensores
-  leSensores(b1, lum, hsolo, h_ar, temp);
+  leSensores(&b1, lum, hsolo, h_ar, temp);
 
   //Conserta o erro de logica da primeira leitura (um termo [0] do array com valor aleatorio)
   if(primeiraLeitura){
