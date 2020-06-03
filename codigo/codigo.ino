@@ -29,7 +29,7 @@ LiquidCrystal lcd(10, 9, 8, 7, 6, 5);
 #define nEspecies 2
 
 //Arrays para armazenar valores dos sensores
-int b1[2], b2[2], b3[2], lum[2], hsolo[2];
+int b1, lum[2], hsolo[2];
 float h_ar[2], temp[2];
 
 volatile int scrollstate = -1;
@@ -40,18 +40,12 @@ String texto = "Temperatura: °C Hum Rel do Ar: % Hum do Solo: ";
 volatile int especie = 0;
 
 //Lista de especies:
-ESPECIE_TIPO especies[nEspecies] = {{"Cebolinha", 100}, {"Manjericao", 200}}; //{Nome, Limite de irrigacao}
+ESPECIE_TIPO especies[nEspecies] = {{"Cebolinha", 700}, {"Manjericao", 800}}; //{Nome, Limite de irrigacao}
 
 /**********************************************************************/
 
 //Le as informacoes dos sensores
-void leSensores(int* b_especie, int* b_irrigacao, int* b_scroll, int* lum, int* hsolo, float* h_ar, float* temp){
-  
-  //Armazena ultimo valor do sensor
-  b_especie[0] = b_especie[1];
-  b_irrigacao[0] = b_irrigacao[1];
-  b_scroll[0] = b_scroll[1];
-
+void leSensores(int* b_irrigacao, int* lum, int* hsolo, float* h_ar, float* temp){
   lum[0] = lum[1];
   hsolo[0] = hsolo[1];
 
@@ -59,9 +53,7 @@ void leSensores(int* b_especie, int* b_irrigacao, int* b_scroll, int* lum, int* 
   temp[0] = temp[1];
   
   //Definicao das entradas dos botoes**************************************
-  b_especie[1] = digitalRead(b1Pin);
-  b_irrigacao[1] = digitalRead(b2Pin);
-  b_scroll[1] = digitalRead(b3Pin);
+  b_irrigacao = digitalRead(b1Pin);
 
   //Armazenamento das entradas dos sensores********************************
   lum[1] = analogRead(ldrPin);
@@ -138,6 +130,7 @@ void setup() {
   //Interrupcoes
   attachInterrupt(0, trocaDeEspecie, FALLING);
   attachInterrupt(1, scroll, RISING);
+
 }
 
 void loop() {
@@ -147,7 +140,7 @@ void loop() {
   b2 e para mudar de especie por interrupcao
   b3 e para alterar o estado do rolamento por interrupcao;
   */
-  leSensores(b1, b2, b3, lum, hsolo, h_ar, temp);
+  leSensores(b1, lum, hsolo, h_ar, temp);
 
   imprimeSensores(lum[1], hsolo[1], h_ar[1], temp[1]);
 
