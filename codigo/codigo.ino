@@ -27,6 +27,7 @@ LiquidCrystal lcd(10, 9, 8, 7, 6, 5);
 
 /* Variaveis globais */
 #define nEspecies 2
+int primeiraLeitura;
 
 //Arrays para armazenar valores dos sensores
 int b1, lum[2], hsolo[2];
@@ -131,6 +132,8 @@ void setup() {
   attachInterrupt(0, trocaDeEspecie, FALLING);
   attachInterrupt(1, scroll, RISING);
 
+  //Define a primeira leitura dos sensores
+  primeiraLeitura = 1;
 }
 
 void loop() {
@@ -140,8 +143,20 @@ void loop() {
   b2 e para mudar de especie por interrupcao
   b3 e para alterar o estado do rolamento por interrupcao;
   */
+
+  //Atualiza os dados dos sensores
   leSensores(b1, lum, hsolo, h_ar, temp);
 
+  //Conserta o erro de logica da primeira leitura (um termo [0] do array com valor aleatorio)
+  if(primeiraLeitura){
+    lum[0] = lum[1];
+    hsolo[0] = hsolo[1];
+    h_ar[0] = h_ar[1];
+    temp[0] = temp[1];
+    primeiraLeitura = 0;
+  }
+
+  //Imprime os dados dos sensores
   imprimeSensores(lum[1], hsolo[1], h_ar[1], temp[1]);
 
   //Bypass do b1 (Irrigacao manual) funciona melhor se usar um switch inves de um botao
