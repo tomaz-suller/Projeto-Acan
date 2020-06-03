@@ -48,15 +48,15 @@ ESPECIE_TIPO especies[nEspecies] = {{"Cebolinha", 100}, {"Manjericao", 200}}; //
 void leSensores(int* b_especie, int* b_irrigacao, int* b_scroll, int* lum, int* hsolo, float* h_ar, float* temp){
   
   //Armazena ultimo valor do sensor
-  b_especie[0] = b_especie[1]
-  b_irrigacao[0] = b_irrigacao[1] 
-  b_scroll[0] = b_scroll[1]
+  b_especie[0] = b_especie[1];
+  b_irrigacao[0] = b_irrigacao[1];
+  b_scroll[0] = b_scroll[1];
 
-  lum[0] = lum[1]
-  hsolo[0] = hsolo[1]
+  lum[0] = lum[1];
+  hsolo[0] = hsolo[1];
 
-  h_ar[0] = h_ar[1]
-  temp[0] = temp[1]
+  h_ar[0] = h_ar[1];
+  temp[0] = temp[1];
   
   //Definicao das entradas dos botoes**************************************
   b_especie[1] = digitalRead(b1Pin);
@@ -110,6 +110,11 @@ void scroll(){
   scrollstate *= -1;
 }
 
+//Irrigacao
+void irriga(){
+  //Implementar controle do solenoide  
+}
+
 void setup() {
   
   Serial.begin(9600);
@@ -120,7 +125,6 @@ void setup() {
   pinMode(ldrPin, INPUT);
   pinMode(higrometroPin, INPUT);
   pinMode(dhtPin, INPUT);
-  pinMode(sensorAguaPin, INPUT);
 
   //Entrada
   pinMode(b1Pin, INPUT);
