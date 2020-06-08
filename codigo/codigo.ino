@@ -157,7 +157,7 @@ void setup() {
   pinMode(solenoidePin, OUTPUT);
 
   //Interrupcoes
-  attachInterrupt(0, trocaDeEspecie, FALLING);
+  attachInterrupt(0, trocaDeEspecie, RISING);
   attachInterrupt(1, scroll, RISING);
 
   //Define a primeira leitura dos sensores
