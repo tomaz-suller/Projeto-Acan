@@ -131,7 +131,9 @@ void scroll(){
 
 //Irrigacao
 void irriga(){
-  //Implementar controle do solenoide  
+  digitalWrite(solenoidePin, HIGH);
+  delay(10000);
+  digitalWrite(solenoidePin, LOW); 
 }
 
 void setup() {
