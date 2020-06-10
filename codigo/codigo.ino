@@ -56,7 +56,7 @@ void leSensores(int* b_irrigacao, int* lum, int* hsolo, float* h_ar, float* temp
   temp[0] = temp[1];
   
   //Definicao das entradas dos botoes**************************************
-  b_irrigacao = digitalRead(b1Pin);
+  *b_irrigacao = digitalRead(b1Pin);
 
   //Armazenamento das entradas dos sensores********************************
   lum[1] = analogRead(ldrPin);
