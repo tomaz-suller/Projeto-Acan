@@ -1,15 +1,4 @@
 
-#include "DHT.h"
-DHT dht(dhtPin, DHT11);
-#include <LiquidCrystal.h>
-LiquidCrystal lcd(10, 9, 11, 5, 6, 7);
-
-//Variavel personalizada para especies
-typedef struct{
-  char nome[16]; //Nome e uma string para ser mostrada no display
-  int limIrrig; //Limite de umidade do solo para o qual a planta deve ser irrigada
-} ESPECIE_TIPO;
-
 /* Sensores */
 #define ldrPin A0
 #define higrometroPin A4
@@ -20,6 +9,19 @@ typedef struct{
 #define b1Pin 4
 #define b2Pin 2
 #define b3Pin 3 
+
+#include "DHT.h"
+DHT dht(dhtPin, DHT11);
+
+/* Saida */
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(10, 9, 11, 5, 6, 7);
+
+//Variavel personalizada para especies
+typedef struct{
+  char nome[16]; //Nome e uma string para ser mostrada no display
+  int limIrrig; //Limite de umidade do solo para o qual a planta deve ser irrigada
+} ESPECIE_TIPO;
 
 /* Variaveis globais */
 #define nEspecies 2
