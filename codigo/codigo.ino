@@ -79,7 +79,7 @@ void imprimeSensores(int lum, int u_solo, float u_ar, float temp){
   //Escolhe os dados que serao mostrados
   switch(indice_tela){
     case 0:
-      linha_1 = "Umd. Solo: " + String(map(u_solo, U_MIN, U_MAX, 0, 100)) + "U";
+      linha_1 = "Umd. Solo: " + String(100 - map(u_solo, U_MIN, U_MAX, 0, 100)) + "U";
       linha_2 = "Lum.: " + String(map(lum, LUM_MIN, LUM_MAX, 0, 100)) + "%";
       break;
     case 1:
@@ -88,11 +88,11 @@ void imprimeSensores(int lum, int u_solo, float u_ar, float temp){
       break;
     case 2:
       linha_1 = especies[especie].nome;
-      linha_2 = "Lim. irrig: " + String(map(especies[especie].limIrrig, U_MIN, U_MAX, 0, 100)) + "U";
+      linha_2 = "Lim. irrig: " + String(100 - map(especies[especie].limIrrig, U_MIN, U_MAX, 0, 100)) + "U";
       break;
     default:
       indice_tela = 0;
-      linha_1 = "Umd. Solo: " + String(map(u_solo, U_MIN, U_MAX, 0, 100)) + "U";
+      linha_1 = "Umd. Solo: " + String(100 - map(u_solo, U_MIN, U_MAX, 0, 100)) + "U";
       linha_2 = "Lum.: " + String(map(lum, LUM_MIN, LUM_MAX, 0, 100)) + "%";
       break;
   }
@@ -181,9 +181,11 @@ void loop() {
 
   //Bypass do b1 (irrigacao manual)
   while(b1 == HIGH){
-    irriga();
+    digitalWrite(solenoidePin, HIGH);
     b1 = digitalRead(b1Pin);
   }
+  digitalWrite(solenoidePin, LOW);
+  
 
   //Condicionais de irrigacao
   if(u_solo[0] >= especies[especie].limIrrig && u_solo[1] >= especies[especie].limIrrig){
