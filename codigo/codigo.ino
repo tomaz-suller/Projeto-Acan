@@ -1,6 +1,8 @@
 
 #include "DHT.h"
+DHT dht(dhtPin, DHT11);
 #include <LiquidCrystal.h>
+LiquidCrystal lcd(10, 9, 11, 5, 6, 7);
 
 //Variavel personalizada para especies
 typedef struct{
@@ -14,16 +16,10 @@ typedef struct{
 #define dhtPin 13
 #define solenoidePin 12
 
-DHT dht(dhtPin, DHT11);
-
 /* Entrada */
 #define b1Pin 4
 #define b2Pin 2
-#define b3Pin 3
-
-/* Saida */
-#define ledPin 4
-LiquidCrystal lcd(10, 9, 11, 5, 6, 7);
+#define b3Pin 3 
 
 /* Variaveis globais */
 #define nEspecies 2
@@ -31,8 +27,8 @@ LiquidCrystal lcd(10, 9, 11, 5, 6, 7);
 int primeiraLeitura;
 
 //Arrays para armazenar valores dos sensores
-int b1, lum[2], hsolo[2];
-float h_ar[2], temp[2];
+int b1, lum[2], u_solo[2];
+float u_ar[2], temp[2];
 
 //Para a selecao dos dados a serem mostrados
 volatile int indice_tela = 0;
@@ -50,11 +46,11 @@ ESPECIE_TIPO especies[nEspecies] = {
 /**********************************************************************/
 
 //Le as informacoes dos sensores
-void leSensores(int* b_irrigacao, int* lum, int* hsolo, float* h_ar, float* temp){
+void leSensores(int* b_irrigacao, int* lum, int* u_solo, float* u_ar, float* temp){
   lum[0] = lum[1];
-  hsolo[0] = hsolo[1];
+  u_solo[0] = u_solo[1];
 
-  h_ar[0] = h_ar[1];
+  u_ar[0] = u_ar[1];
   temp[0] = temp[1];
   
   //Definicao das entradas dos botoes
@@ -62,26 +58,26 @@ void leSensores(int* b_irrigacao, int* lum, int* hsolo, float* h_ar, float* temp
 
   //Armazenamento das entradas dos sensores
   lum[1] = analogRead(ldrPin);
-  hsolo[1] = analogRead(higrometroPin);
+  u_solo[1] = analogRead(higrometroPin);
 
-  h_ar[1] = dht.readHumidity();
+  u_ar[1] = dht.readHumidity();
   temp[1] = dht.readTemperature();
 }
 
 //Mostra as informacoes dos sensores no display
-void imprimeSensores(int lum, int hsolo, float h_ar, float temp){
+void imprimeSensores(int lum, int u_solo, float u_ar, float temp){
   String linha_1;
   String linha_2;
 
   //Escolhe os dados que serao mostrados
   switch(indice_tela){
     case 0:
-      linha_1 = "Hum. Solo: " + String(hsolo);
+      linha_1 = "Umd. Solo: " + String(u_solo);
       linha_2 = "Lum.: " + String(lum);
       break;
     case 1:
       linha_1 = "Temp.: " +String(temp, 2) + " °C";
-      linha_2 = "Hum. Ar: " + String(h_ar, 2);
+      linha_2 = "Umd. Ar: " + String(u_ar, 2);
       break;
     case 2:
       linha_1 = especies[especie].nome;
@@ -89,7 +85,7 @@ void imprimeSensores(int lum, int hsolo, float h_ar, float temp){
       break;
     default:
       indice_tela = 0;
-      linha_1 = "Hum. Solo: " + String(hsolo);
+      linha_1 = "Umd. Solo: " + String(u_solo);
       linha_2 = "Lum.: " + String(lum);
       break;
   }
@@ -105,6 +101,14 @@ void imprimeSensores(int lum, int hsolo, float h_ar, float temp){
   Serial.println(linha_2);
 }
 
+//Interrupcao que altera os dados mostrados no LCD
+void scroll(){
+  indice_tela++;
+  if(indice_tela >= nTelas){
+    indice_tela = 0;
+  }
+}
+
 //Interrupcao que troca o indice da especie
 void trocaDeEspecie(){
   especie++;
@@ -113,15 +117,7 @@ void trocaDeEspecie(){
   }  
 }
 
-//Interrupcao que ativa e desliga rolamento dos dados no LCD
-void scroll(){
-  indice_tela++;
-  if(indice_tela >= nTelas){
-    indice_tela = 0;
-  }
-}
-
-//Irrigacao
+//Liga o sistema de irrigacao por 10 s
 void irriga(){
   digitalWrite(solenoidePin, HIGH);
   delay(10000);
@@ -164,20 +160,20 @@ void loop() {
   b3 e para alterar o estado do rolamento por interrupcao;
   */
   //Atualiza os dados dos sensores
-  leSensores(&b1, lum, hsolo, h_ar, temp);
+  leSensores(&b1, lum, u_solo, u_ar, temp);
 
   //Conserta o erro de logica da primeira leitura (um termo [0] do array com valor aleatorio)
   if(primeiraLeitura){
     lum[0] = lum[1];
-    hsolo[0] = hsolo[1];
-    h_ar[0] = h_ar[1];
+    u_solo[0] = u_solo[1];
+    u_ar[0] = u_ar[1];
     temp[0] = temp[1];
     primeiraLeitura = 0;
   }
 
   //Imprime os dados dos sensores
   noInterrupts();
-  imprimeSensores(lum[1], hsolo[1], h_ar[1], temp[1]);
+  imprimeSensores(lum[1], u_solo[1], u_ar[1], temp[1]);
   interrupts();
 
   //Bypass do b1 (irrigacao manual)
@@ -187,9 +183,9 @@ void loop() {
   }
 
   //Condicionais de irrigacao
-  if(hsolo[0] >= especies[especie].limIrrig && hsolo[1] >= especies[especie].limIrrig){
+  if(u_solo[0] >= especies[especie].limIrrig && u_solo[1] >= especies[especie].limIrrig){
     digitalWrite(solenoidePin, HIGH);
-  }else if(hsolo[0] < especies[especie].limIrrig && hsolo[1] < especies[especie].limIrrig){
+  }else if(u_solo[0] < especies[especie].limIrrig && u_solo[1] < especies[especie].limIrrig){
     digitalWrite(solenoidePin, LOW);
   }
    
