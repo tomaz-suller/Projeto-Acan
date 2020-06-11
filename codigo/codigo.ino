@@ -143,7 +143,6 @@ void setup() {
   pinMode(b3Pin, INPUT);
 
   //Saida
-  pinMode(ledPin, OUTPUT);
   pinMode(solenoidePin, OUTPUT);
 
   //Interrupcoes
