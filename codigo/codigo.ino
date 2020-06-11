@@ -127,7 +127,7 @@ void trocaDeEspecie(){
 //Liga o sistema de irrigacao por 10 s
 void irriga(){
   digitalWrite(solenoidePin, HIGH);
-  delay(10000);
+  delay(5000);
   digitalWrite(solenoidePin, LOW);
 }
 
