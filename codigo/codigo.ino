@@ -79,21 +79,21 @@ void imprimeSensores(int lum, int u_solo, float u_ar, float temp){
   //Escolhe os dados que serao mostrados
   switch(indice_tela){
     case 0:
-      linha_1 = "Umd. Solo: " + String(map(u_solo, U_MIN, U_MAX, 0, 100));
-      linha_2 = "Lum.: " + String(lum);
+      linha_1 = "Umd. Solo: " + String(map(u_solo, U_MIN, U_MAX, 0, 100)) + "U";
+      linha_2 = "Lum.: " + String(map(lum, LUM_MIN, LUM_MAX, 0, 100)) + "%";
       break;
     case 1:
       linha_1 = "Temp.: " +String(temp, 2) + "C";
-      linha_2 = "Umd. Ar: " + String(u_ar, 2);
+      linha_2 = "Umd. Ar: " + String(u_ar, 2) + "%";
       break;
     case 2:
       linha_1 = especies[especie].nome;
-      linha_2 = "Lim. irrig: " + String(map(especies[especie].limIrrig, U_MIN, U_MAX, 0, 100));
+      linha_2 = "Lim. irrig: " + String(map(especies[especie].limIrrig, U_MIN, U_MAX, 0, 100)) + "U";
       break;
     default:
       indice_tela = 0;
-      linha_1 = "Umd. Solo: " + String(u_solo);
-      linha_2 = "Lum.: " + String(map(lum, LUM_MIN, LUM_MAX, 0, 100));
+      linha_1 = "Umd. Solo: " + String(map(u_solo, U_MIN, U_MAX, 0, 100)) + "U";
+      linha_2 = "Lum.: " + String(map(lum, LUM_MIN, LUM_MAX, 0, 100)) + "%";
       break;
   }
 
