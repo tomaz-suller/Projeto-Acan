@@ -88,7 +88,7 @@ void imprimeSensores(int lum, int u_solo, float u_ar, float temp){
       break;
     case 2:
       linha_1 = especies[especie].nome;
-      linha_2 = "Lim. irrig: " + String(especies[especie].limIrrig);
+      linha_2 = "Lim. irrig: " + String(map(especies[especie].limIrrig, U_MIN, U_MAX, 0, 100));
       break;
     default:
       indice_tela = 0;
