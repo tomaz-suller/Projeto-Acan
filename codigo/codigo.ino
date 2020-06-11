@@ -2,8 +2,6 @@
 #include "DHT.h"
 #include <LiquidCrystal.h>
 
-#define DEBUG true
-
 //Variavel personalizada para especies
 typedef struct{
   char nome[16]; //Nome e uma string para ser mostrada no display
@@ -19,31 +17,35 @@ typedef struct{
 DHT dht(dhtPin, DHT11);
 
 /* Entrada */
-#define b1Pin 1
+#define b1Pin 4
 #define b2Pin 2
 #define b3Pin 3
 
 /* Saida */
 #define ledPin 4
-LiquidCrystal lcd(10, 9, 8, 7, 6, 5);
+LiquidCrystal lcd(10, 9, 11, 5, 6, 7);
 
 /* Variaveis globais */
 #define nEspecies 2
+#define nTelas 3
 int primeiraLeitura;
 
 //Arrays para armazenar valores dos sensores
 int b1, lum[2], hsolo[2];
 float h_ar[2], temp[2];
 
-volatile int scrollstate = -1;
-String texto = "Temperatura: °C Hum Rel do Ar: % Hum do Solo: ";
-#define tamanho_texto 60
+//Para a selecao dos dados a serem mostrados
+volatile int indice_tela = 0;
 
 //Para as partes do programa que dependem da especie escolhida
 volatile int especie = 0;
 
 //Lista de especies:
-ESPECIE_TIPO especies[nEspecies] = {{"Cebolinha", 700}, {"Manjericao", 800}}; //{Nome, Limite de irrigacao}
+ESPECIE_TIPO especies[nEspecies] = {
+  {"Cebolinha", 700},
+  {"Manjericao", 800}
+  //{Nome, Limite de irrigacao}
+  };
 
 /**********************************************************************/
 
@@ -55,10 +57,10 @@ void leSensores(int* b_irrigacao, int* lum, int* hsolo, float* h_ar, float* temp
   h_ar[0] = h_ar[1];
   temp[0] = temp[1];
   
-  //Definicao das entradas dos botoes**************************************
+  //Definicao das entradas dos botoes
   *b_irrigacao = digitalRead(b1Pin);
 
-  //Armazenamento das entradas dos sensores********************************
+  //Armazenamento das entradas dos sensores
   lum[1] = analogRead(ldrPin);
   hsolo[1] = analogRead(higrometroPin);
 
@@ -68,52 +70,39 @@ void leSensores(int* b_irrigacao, int* lum, int* hsolo, float* h_ar, float* temp
 
 //Mostra as informacoes dos sensores no display
 void imprimeSensores(int lum, int hsolo, float h_ar, float temp){
-  
-  if(DEBUG){
+  String linha_1;
+  String linha_2;
 
-    Serial.println(especies[especie].nome);
-
-    Serial.print("Temp.: ");
-    Serial.print(temp);
-    Serial.print(" °C ");
-    //Imprime exatamente 16 caracteres
-    if(scrollstate == 1){
-      texto = texto.substring(0,12) + String(temp) + texto.substring(13,30) + String(h_ar) + texto.substring(31,46) + String(hsolo);
-
-      int ini = 0, fim = 16;
-
-      for(; fim <= tamanho_texto; ini++, fim++){
-        Serial.println( texto.substring(ini, fim) ); 
-        delay(300);
-      }
-
-    }
-
-  }else{
-
-    lcd.setCursor(1,0);
-    lcd.print(especies[especie].nome);
-
-    lcd.setCursor(0,0);
-    lcd.print("Temp.: ");
-    lcd.print(temp);
-    lcd.print(" °C ");
-    //Imprime exatamente 16 caracteres
-    if(scrollstate == 1){
-      texto = texto.substring(0,12) + String(temp) + texto.substring(13,30) + String(h_ar) + texto.substring(31,46) + String(hsolo);
-
-      int ini = 0, fim = 16;
-
-      for(; fim <= tamanho_texto; ini++, fim++){
-        lcd.setCursor(0, 0);
-        lcd.print( texto.substring(ini, fim) ); 
-        delay(300);
-      }
-
-    }
-
+  //Escolhe os dados que serao mostrados
+  switch(indice_tela){
+    case 0:
+      linha_1 = "Hum. Solo: " + String(hsolo);
+      linha_2 = "Lum.: " + String(lum);
+      break;
+    case 1:
+      linha_1 = "Temp.: " +String(temp, 2) + " °C";
+      linha_2 = "Hum. Ar: " + String(h_ar, 2);
+      break;
+    case 2:
+      linha_1 = especies[especie].nome;
+      linha_2 = "Lim. irrig: " + String(especies[especie].limIrrig);
+      break;
+    default:
+      indice_tela = 0;
+      linha_1 = "Hum. Solo: " + String(hsolo);
+      linha_2 = "Lum.: " + String(lum);
+      break;
   }
 
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(linha_1);
+  lcd.setCursor(0,1);
+  lcd.print(linha_2);
+  
+  //Para testes
+  Serial.println(linha_1);
+  Serial.println(linha_2);
 }
 
 //Interrupcao que troca o indice da especie
@@ -126,19 +115,22 @@ void trocaDeEspecie(){
 
 //Interrupcao que ativa e desliga rolamento dos dados no LCD
 void scroll(){
-  scrollstate *= -1;
+  indice_tela++;
+  if(indice_tela >= nTelas){
+    indice_tela = 0;
+  }
 }
 
 //Irrigacao
 void irriga(){
   digitalWrite(solenoidePin, HIGH);
   delay(10000);
-  digitalWrite(solenoidePin, LOW); 
+  digitalWrite(solenoidePin, LOW);
 }
 
 void setup() {
   
-  Serial.begin(9600);
+
   lcd.begin(16, 2);
   dht.begin();
 
@@ -165,13 +157,12 @@ void setup() {
 }
 
 void loop() {
-
-  /* Nesta funcao, dos botoes:
+  /* 
+  Nesta funcao, dos botoes:
   b1 e para irrigar manualmente
   b2 e para mudar de especie por interrupcao
   b3 e para alterar o estado do rolamento por interrupcao;
   */
-
   //Atualiza os dados dos sensores
   leSensores(&b1, lum, hsolo, h_ar, temp);
 
@@ -185,11 +176,14 @@ void loop() {
   }
 
   //Imprime os dados dos sensores
+  noInterrupts();
   imprimeSensores(lum[1], hsolo[1], h_ar[1], temp[1]);
+  interrupts();
 
   //Bypass do b1 (irrigacao manual)
   while(b1 == HIGH){
-    irriga();  
+    irriga();
+    b1 = digitalRead(b1Pin);
   }
 
   //Condicionais de irrigacao
