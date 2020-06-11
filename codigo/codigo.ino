@@ -24,11 +24,6 @@ typedef struct{
 } ESPECIE_TIPO;
 
 /* Variaveis globais */
-#define U_MIN 0
-#define U_MAX 800
-#define LUM_MIN 0
-#define LUM_MAX 1023
-
 #define nEspecies 2
 #define nTelas 3
 int primeiraLeitura;
@@ -45,10 +40,10 @@ volatile int especie = 0;
 
 //Lista de especies:
 ESPECIE_TIPO especies[nEspecies] = {
-  //{Nome, Limite de irrigacao}
   {"Cebolinha", 700},
   {"Manjericao", 800}
-};
+  //{Nome, Limite de irrigacao}
+  };
 
 /**********************************************************************/
 
@@ -79,11 +74,11 @@ void imprimeSensores(int lum, int u_solo, float u_ar, float temp){
   //Escolhe os dados que serao mostrados
   switch(indice_tela){
     case 0:
-      linha_1 = "Umd. Solo: " + String( map( u_solo, U_MIN, U_MAX, 0, 100 ); );
+      linha_1 = "Umd. Solo: " + String(u_solo);
       linha_2 = "Lum.: " + String(lum);
       break;
     case 1:
-      linha_1 = "Temp.: " +String(temp, 2) + "C";
+      linha_1 = "Temp.: " +String(temp, 2) + " °C";
       linha_2 = "Umd. Ar: " + String(u_ar, 2);
       break;
     case 2:
@@ -93,7 +88,7 @@ void imprimeSensores(int lum, int u_solo, float u_ar, float temp){
     default:
       indice_tela = 0;
       linha_1 = "Umd. Solo: " + String(u_solo);
-      linha_2 = "Lum.: " + String( map( lum, LUM_MIN, LUM_MAX, 0, 100 ); );
+      linha_2 = "Lum.: " + String(lum);
       break;
   }
 
@@ -133,6 +128,7 @@ void irriga(){
 
 void setup() {
   
+
   lcd.begin(16, 2);
   dht.begin();
 
@@ -177,9 +173,7 @@ void loop() {
   }
 
   //Imprime os dados dos sensores
-  noInterrupts();
   imprimeSensores(lum[1], u_solo[1], u_ar[1], temp[1]);
-  interrupts();
 
   //Bypass do b1 (irrigacao manual)
   while(b1 == HIGH){
@@ -189,7 +183,9 @@ void loop() {
 
   //Condicionais de irrigacao
   if(u_solo[0] >= especies[especie].limIrrig && u_solo[1] >= especies[especie].limIrrig){
-    irriga();
+    digitalWrite(solenoidePin, HIGH);
+  }else if(u_solo[0] < especies[especie].limIrrig && u_solo[1] < especies[especie].limIrrig){
+    digitalWrite(solenoidePin, LOW);
   }
    
   delay(1000);
