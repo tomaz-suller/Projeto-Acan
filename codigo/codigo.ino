@@ -17,12 +17,6 @@ DHT dht(dhtPin, DHT11);
 #include <LiquidCrystal.h>
 LiquidCrystal lcd(10, 9, 11, 5, 6, 7);
 
-//Variavel personalizada para especies
-typedef struct{
-  char nome[16]; //Nome e uma string para ser mostrada no display
-  int limIrrig; //Limite de umidade do solo para o qual a planta deve ser irrigada
-} ESPECIE_TIPO;
-
 /* Variaveis globais */
 #define U_MIN 0
 #define U_MAX 800
@@ -33,9 +27,15 @@ typedef struct{
 #define nTelas 3
 int primeiraLeitura;
 
-//Arrays para armazenar valores dos sensores
+//Para armazenar valores dos sensores
 int b1, lum[2], u_solo[2];
 float u_ar[2], temp[2];
+
+//Variavel personalizada para especies
+typedef struct{
+  char nome[16]; //Nome e uma string para ser mostrada no display
+  int limIrrig; //Limite de umidade do solo para o qual a planta deve ser irrigada
+} ESPECIE_TIPO;
 
 //Para a selecao dos dados a serem mostrados
 volatile int indice_tela = 0;
