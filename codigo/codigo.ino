@@ -8,7 +8,7 @@
 /* Entrada */
 #define b1Pin 4
 #define b2Pin 2
-#define b3Pin 3 
+#define b3Pin 3
 
 #include "DHT.h"
 DHT dht(dhtPin, DHT11);
